@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -16,10 +17,12 @@ import {
   REVIEW_BY_PRODUCT_ID_NOT_FOUND,
   REVIEW_NOT_FOUND,
 } from './review.constants';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { UserEmail } from 'src/decorators/user-emai.decorator';
 
 @Controller('review')
 export class ReviewController {
-  constructor(private readonly reviewService: ReviewService) {}
+  constructor(private readonly reviewService: ReviewService) { }
 
   @UsePipes(new ValidationPipe())
   @Post('create')
@@ -27,6 +30,7 @@ export class ReviewController {
     return this.reviewService.create(dto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const deletedDoc = await this.reviewService.delete(id);
@@ -34,20 +38,25 @@ export class ReviewController {
       throw new HttpException(REVIEW_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
   }
+
+  // @UseGuards(JwtAuthGuard)
   @Get('getByProduct/:productId')
-  async getByProduct(@Param('productId') productId: string) {
+  async getByProduct(
+    @Param('productId') productId: string,
+    // @UserEmail() email: string
+  ) {
     const reviews = await this.reviewService.findByProductId(productId);
     return reviews;
   }
 
-//   @Delete('deleteByProduct/:productId')
-//   async deleteByProductId(@Param('productId') productId: string) {
-//     const reviews = await this.reviewService.deleteByProductId(productId);
-//     if (reviews) {
-//       throw new HttpException(
-//         REVIEW_BY_PRODUCT_ID_NOT_FOUND,
-//         HttpStatus.NOT_FOUND,
-//       );
-//     }
-//   }
+  //   @Delete('deleteByProduct/:productId')
+  //   async deleteByProductId(@Param('productId') productId: string) {
+  //     const reviews = await this.reviewService.deleteByProductId(productId);
+  //     if (reviews) {
+  //       throw new HttpException(
+  //         REVIEW_BY_PRODUCT_ID_NOT_FOUND,
+  //         HttpStatus.NOT_FOUND,
+  //       );
+  //     }
+  //   }
 }
