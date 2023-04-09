@@ -25,6 +25,7 @@ import { IdValidationPipe } from 'src/pipes/id-validation.pipe';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) { }
 
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
   @Post('create')
   async create(@Body() dto: CreateReviewDto) {
